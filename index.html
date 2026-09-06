@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ascend Advanced Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <div>
+        <h2>ASCEND OUTSTANDING</h2>
+        <p>Multi-Sheet Management Dashboard</p>
+    </div>
+    <button onclick="loadSheetData()" class="refresh-btn">🔄 Refresh</button>
+</header>
+
+<!-- SHEET SELECTOR TABS -->
+<div class="sheet-tabs">
+    <button class="tab-btn active" onclick="switchSheet('Final Data', this)">Final Data</button>
+    <button class="tab-btn" onclick="switchSheet('Recovery', this)">Recovery</button>
+    <button class="tab-btn" onclick="switchSheet('DA Sheet', this)">DA Sheet (Automation)</button>
+    <button class="tab-btn" onclick="switchSheet('Outstanding', this)">Outstanding</button>
+</div>
+
+<!-- 📊 3 SUMMARY STATS CARDS (NEW ADDED) -->
+<div class="stats-container">
+    <div class="stat-card">
+        <h3>Total Bill Amount</h3>
+        <p id="totalAmountSum">₹ 0</p>
+    </div>
+    <div class="stat-card">
+        <h3>Pending Amount</h3>
+        <p id="totalPendingSum">₹ 0</p>
+    </div>
+    <div class="stat-card">
+        <h3>Total Bills Count</h3>
+        <p id="totalBillsCount">0</p>
+    </div>
+</div>
+
+<!-- FILTER & SEARCH SECTION -->
+<div class="filter-box">
+    <input type="text" id="searchBox" placeholder="🔍 Search anything..." oninput="filterAndRender()">
+    
+    <select id="userFilter" onchange="filterAndRender()">
+        <option value="">All Users (GTM)</option>
+    </select>
+    
+    <button onclick="clearAllFilters()">Clear Filters</button>
+</div>
+
+<!-- TABLE CONTAINER -->
+<div class="table-container">
+    <table id="dataTable">
+        <thead id="tableHead">
+            <!-- Dynamic Headers -->
+        </thead>
+        <tbody id="tableBody">
+            <tr><td class="loading">Loading Data...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
