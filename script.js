@@ -107,7 +107,7 @@ function updateStats(data) {
         
         // Find keys dynamically (ab yeh 'pending' word ko bhi pakad lega)
         const amountKey = headers.find(h => h.toLowerCase().includes("amount"));
-        const pendingKey = headers.find(h => h.toLowerCase().includes("pending") || h.toLowerCase().includes("") || h.toLowerCase().includes("balance"));
+        const pendingKey = headers.find(h => h.toLowerCase().includes("pending") || h.toLowerCase().includes("Pending") || h.toLowerCase().includes("balance"));
 
         data.forEach(row => {
             if (amountKey) {
