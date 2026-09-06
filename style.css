@@ -31,7 +31,59 @@ th:hover { background: #1565c0; }
 td { padding: 9px 10px; border-bottom: 1px solid #eee; font-size: 12px; }
 tr:hover { background: #f5f9ff; }
 .loading { text-align: center; padding: 25px; font-weight: bold; color: #555; }
+/* 📏 Description column ki width fix karne ke liye */
+/* TABLE CONTAINER - Compact & Optimized for Mobile */
+.table-container { 
+    margin: 0 10px 10px; 
+    background: white; 
+    overflow-x: auto; 
+    -webkit-overflow-scrolling: touch; 
+    border-radius: 8px; 
+    box-shadow: 0 2px 8px rgba(0,0,0,.08); 
+    max-height: 550px; 
+}
 
+table { 
+    border-collapse: collapse; 
+    width: 100%; 
+    white-space: nowrap; 
+    font-size: 11px; /* Font thoda chhota kiya taaki zyada data fit ho */
+} 
+
+th { 
+    background: #0d47a1; 
+    color: white; 
+    padding: 8px 6px; /* Padding kam ki */
+    font-size: 11px; 
+    position: sticky; 
+    top: 0; 
+    cursor: pointer; 
+    text-align: left; 
+    z-index: 2; 
+}
+
+th:hover { background: #1565c0; }
+
+td { 
+    padding: 7px 6px; /* Cell ki padding tight ki */
+    border-bottom: 1px solid #eee; 
+    font-size: 11px; 
+}
+
+tr:hover { background: #f5f9ff; }
+.loading { text-align: center; padding: 25px; font-weight: bold; color: #555; }
+
+/* Map Link Style */
+td a { 
+    color: #0d47a1; 
+    font-weight: bold; 
+    text-decoration: none; 
+    padding: 3px 6px; 
+    background: #e3f2fd; 
+    border-radius: 4px; 
+    display: inline-block; 
+    font-size: 10px; 
+}
 /* Map Link Style */
 td a { color: #0d47a1; font-weight: bold; text-decoration: none; padding: 4px 8px; background: #e3f2fd; border-radius: 4px; display: inline-block; font-size: 11px; }
 td a:hover { background: #bbdefb; text-decoration: none; }
