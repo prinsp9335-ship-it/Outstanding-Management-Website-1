@@ -7,22 +7,25 @@ let allData = [];
 let filteredData = [];
 let sortDirection = false;
 
+// ⚡ Performance Pagination & Debounce State
+let currentPage = 1;
+const rowsPerPage = 100;
+let debounceTimer;
+
 function switchSheet(tableName, btnElement) {
-    // 🔒 Specific Protection: Sirf 'Master_Sales_Data' button par password mangega
+    // 🔒 Protection: Sirf 'Master_Sales_Data' button par password mangega
     if (tableName === 'Master_Sales_Data') {
         const password = prompt("🔒 Access Restricted! Enter Password to view Master Sales Data:");
-        
-        // Yahan apna man-pasand password set kar sakte ho (e.g., "1234" ya "admin123")
         if (password !== "ascend") { 
             alert("❌ Incorrect Password! Access Denied.");
-            return; // Galat password par tab switch nahi hoga
+            return;
         }
     }
 
-    // Pass password, tab normal switch karega
     document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
     btnElement.classList.add("active");
     currentSheet = tableName;
+    currentPage = 1;
     loadSheetData();
 }
 
@@ -30,7 +33,6 @@ async function loadSheetData() {
     const tableBody = document.getElementById("tableBody");
     const tableHead = document.getElementById("tableHead");
     
-    // 🔍 Target Table Declaration & Case Sensitivity Fix
     let targetTable = currentSheet;
     if (currentSheet.toLowerCase() === "outstanding") {
         targetTable = "Outstanding";
@@ -41,7 +43,6 @@ async function loadSheetData() {
     tableHead.innerHTML = "";
 
     try {
-        // 🚀 URL Encoding + 50,000 Row Limit (Override 1000 limit)
         const endpoint = `${SUPABASE_URL}/rest/v1/${encodeURIComponent(targetTable)}?select=*&limit=50000`;
         
         const response = await fetch(endpoint, {
@@ -64,15 +65,18 @@ async function loadSheetData() {
         filteredData = [...allData];
 
         populateUsers();
+        populateDates();
         filterAndRender();
     } catch (error) {
         console.error(error);
-        tableBody.innerHTML = `<tr><td class="loading" style="color:red;" colspan="15">❌ Error fetching data from Supabase: ${error.message}</td></tr>`;
+        tableBody.innerHTML = `<tr><td class="loading" style="color:red;" colspan="15">❌ Error fetching data: ${error.message}</td></tr>`;
     }
 }
 
 function populateUsers() {
     const userFilter = document.getElementById("userFilter");
+    if (!userFilter) return;
+
     userFilter.innerHTML = `<option value="">All Users (GTM)</option>`;
 
     if (!allData.length) return;
@@ -90,27 +94,99 @@ function populateUsers() {
     });
 }
 
+function populateDates() {
+    const dateFilter = document.getElementById("dateFilter");
+    if (!dateFilter) return;
+
+    dateFilter.innerHTML = `
+        <option value="">All Dates</option>
+        <option value="today">Today</option>
+        <option value="yesterday">Yesterday</option>
+        <option value="this_month">This Month</option>
+        <option value="custom">Custom Date Range 📅</option>
+    `;
+}
+
+function toggleCustomDateInputs() {
+    const dateFilter = document.getElementById("dateFilter");
+    const customContainer = document.getElementById("customDateContainer");
+    if (dateFilter && customContainer) {
+        customContainer.style.display = (dateFilter.value === "custom") ? "inline-flex" : "none";
+    }
+}
+
+// ⚡ Fast Typing Debounce Function
+function debouncedFilter() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+        currentPage = 1;
+        filterAndRender();
+    }, 300);
+}
+
 function filterAndRender() {
-    const searchVal = document.getElementById("searchBox").value.toLowerCase().trim();
-    const selectedUser = document.getElementById("userFilter").value;
-    
+    const searchVal = (document.getElementById("searchBox")?.value || "").toLowerCase().trim();
+    const selectedUser = document.getElementById("userFilter")?.value || "";
+    const selectedDateFilter = document.getElementById("dateFilter")?.value || "";
+
     if (!allData.length) {
         renderTable([]);
         return;
     }
 
     const userKey = Object.keys(allData[0]).find(k => k.toLowerCase().includes("user"));
+    const dateKey = Object.keys(allData[0]).find(k => k.toLowerCase().includes("date"));
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    let customStart = null;
+    let customEnd = null;
+    if (selectedDateFilter === "custom") {
+        const sVal = document.getElementById("startDate")?.value;
+        const eVal = document.getElementById("endDate")?.value;
+        if (sVal) customStart = new Date(sVal);
+        if (eVal) {
+            customEnd = new Date(eVal);
+            customEnd.setHours(23, 59, 59, 999);
+        }
+    }
 
     filteredData = allData.filter(row => {
         const matchesSearch = searchVal === "" || Object.values(row).some(val => String(val).toLowerCase().includes(searchVal));
         const matchesUser = !selectedUser || (userKey && String(row[userKey]).trim() === selectedUser);
-        return matchesSearch && matchesUser;
+
+        let matchesDate = true;
+        if (selectedDateFilter && dateKey && row[dateKey]) {
+            const rowDate = new Date(row[dateKey]);
+            rowDate.setHours(0, 0, 0, 0);
+
+            if (!isNaN(rowDate.getTime())) {
+                if (selectedDateFilter === "today") {
+                    matchesDate = rowDate.getTime() === today.getTime();
+                } else if (selectedDateFilter === "yesterday") {
+                    matchesDate = rowDate.getTime() === yesterday.getTime();
+                } else if (selectedDateFilter === "this_month") {
+                    matchesDate = rowDate >= startOfMonth && rowDate <= today;
+                } else if (selectedDateFilter === "custom") {
+                    if (customStart && rowDate < customStart) matchesDate = false;
+                    if (customEnd && rowDate > customEnd) matchesDate = false;
+                }
+            }
+        }
+
+        return matchesSearch && matchesUser && matchesDate;
     });
 
     renderTable(filteredData);
 }
 
-// 📅 Date Formatter (dd-mmm-yyyy)
+// 📅 Date Formatter
 function formatDate(dateString) {
     if (!dateString) return "";
     let d = new Date(dateString);
@@ -124,7 +200,7 @@ function formatDate(dateString) {
     return `${day}-${month}-${year}`;
 }
 
-// 📊 Stats Calculation & Update Function
+// 📊 Stats Calculation
 function updateStats(data) {
     let totalAmount = 0;
     let totalPending = 0;
@@ -148,11 +224,16 @@ function updateStats(data) {
         });
     }
 
-    document.getElementById("totalAmountSum").textContent = "₹ " + totalAmount.toLocaleString('en-IN');
-    document.getElementById("totalPendingSum").textContent = "₹ " + totalPending.toLocaleString('en-IN');
-    document.getElementById("totalBillsCount").textContent = billCount.toLocaleString('en-IN');
+    const amtElem = document.getElementById("totalAmountSum");
+    const pendElem = document.getElementById("totalPendingSum");
+    const countElem = document.getElementById("totalBillsCount");
+
+    if (amtElem) amtElem.textContent = "₹ " + totalAmount.toLocaleString('en-IN');
+    if (pendElem) pendElem.textContent = "₹ " + totalPending.toLocaleString('en-IN');
+    if (countElem) countElem.textContent = billCount.toLocaleString('en-IN');
 }
 
+// ⚡ Ultra-Fast DOM DocumentFragment Render Function
 function renderTable(data) {
     const tableHead = document.getElementById("tableHead");
     const tableBody = document.getElementById("tableBody");
@@ -164,13 +245,13 @@ function renderTable(data) {
 
     if (!data.length) {
         tableBody.innerHTML = `<tr><td class="loading" colspan="15">No Data Found</td></tr>`;
+        renderPagination(0);
         return;
     }
 
-    // Auto-generated 'id' field ko table view se hidden rakhne ke liye filter
     const headers = Object.keys(data[0]).filter(h => h !== "id");
 
-    // Headers Row Setup
+    // Header Setup
     let headerRow = document.createElement("tr");
     headers.forEach(header => {
         let th = document.createElement("th");
@@ -180,8 +261,14 @@ function renderTable(data) {
     });
     tableHead.appendChild(headerRow);
 
-    // Data Rows Setup
-    data.forEach(row => {
+    // ⚡ Pagination Slicing
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const paginatedData = data.slice(startIndex, startIndex + rowsPerPage);
+
+    // ⚡ Background Fragment Painting (No Browser Freeze)
+    const fragment = document.createDocumentFragment();
+
+    paginatedData.forEach(row => {
         let tr = document.createElement("tr");
         headers.forEach(header => {
             let td = document.createElement("td");
@@ -191,12 +278,9 @@ function renderTable(data) {
                 let stringVal = typeof val === 'object' ? JSON.stringify(val) : String(val);
                 let lowerHeader = header.toLowerCase();
 
-                // 📅 Date Formatting
                 if (lowerHeader.includes("date")) {
                     td.textContent = formatDate(stringVal);
-                } 
-                // Links/Map Detection
-                else if (lowerHeader.includes("location") || stringVal.startsWith("http://") || stringVal.startsWith("https://")) {
+                } else if (lowerHeader.includes("location") || stringVal.startsWith("http://") || stringVal.startsWith("https://")) {
                     let a = document.createElement("a");
                     a.href = stringVal;
                     a.textContent = "📍 Open Map";
@@ -211,8 +295,43 @@ function renderTable(data) {
 
             tr.appendChild(td);
         });
-        tableBody.appendChild(tr);
+        fragment.appendChild(tr);
     });
+
+    tableBody.appendChild(fragment);
+    renderPagination(data.length);
+}
+
+// 📄 Pagination Controls Generator
+function renderPagination(totalRows) {
+    let paginationContainer = document.getElementById("paginationControls");
+    
+    if (!paginationContainer) {
+        paginationContainer = document.createElement("div");
+        paginationContainer.id = "paginationControls";
+        paginationContainer.style.cssText = "display: flex; gap: 10px; align-items: center; justify-content: center; margin: 15px 0;";
+        const table = document.querySelector("table");
+        if (table && table.parentNode) {
+            table.parentNode.insertBefore(paginationContainer, table.nextSibling);
+        }
+    }
+
+    const totalPages = Math.ceil(totalRows / rowsPerPage);
+    if (totalPages <= 1) {
+        paginationContainer.innerHTML = "";
+        return;
+    }
+
+    paginationContainer.innerHTML = `
+        <button onclick="changePage(-1)" ${currentPage === 1 ? 'disabled' : ''}>◀ Prev</button>
+        <span>Page <strong>${currentPage}</strong> of <strong>${totalPages}</strong></span>
+        <button onclick="changePage(1)" ${currentPage === totalPages ? 'disabled' : ''}>Next ▶</button>
+    `;
+}
+
+function changePage(step) {
+    currentPage += step;
+    renderTable(filteredData);
 }
 
 function sortTable(column) {
@@ -230,8 +349,20 @@ function sortTable(column) {
 }
 
 function clearAllFilters() {
-    document.getElementById("searchBox").value = "";
-    document.getElementById("userFilter").value = "";
+    const searchBox = document.getElementById("searchBox");
+    const userFilter = document.getElementById("userFilter");
+    const dateFilter = document.getElementById("dateFilter");
+    const startDate = document.getElementById("startDate");
+    const endDate = document.getElementById("endDate");
+
+    if (searchBox) searchBox.value = "";
+    if (userFilter) userFilter.value = "";
+    if (dateFilter) dateFilter.value = "";
+    if (startDate) startDate.value = "";
+    if (endDate) endDate.value = "";
+
+    toggleCustomDateInputs();
+    currentPage = 1;
     filterAndRender();
 }
 
