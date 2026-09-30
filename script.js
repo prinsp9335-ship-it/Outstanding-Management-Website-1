@@ -1,15 +1,28 @@
+// ⚡ Supabase Configuration
+const SUPABASE_URL = "https://vwmmekqsncajubsqoitd.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_saFTZ0xJ4l1yoEUCeDNmZQ_2IonEsgU";
 
-const BASE_URL = "https://script.google.com/macros/s/AKfycbwlOHe0b8KaH6j5oZHWRutjRN2uquNFYVIhGNfBQuHHMobkI9ReFhhaLhG3WJ6ECBphpA/exec"; 
-
-let currentSheet = "";
+let currentSheet = "outstanding"; // Default table name
 let allData = [];
 let filteredData = [];
 let sortDirection = false;
 
-function switchSheet(sheetName, btnElement) {
+function switchSheet(tableName, btnElement) {
+    // 🔒 Specific Protection: Sirf 'Master_Sales_Data' button par password mangega
+    if (tableName === 'Master_Sales_Data') {
+        const password = prompt("🔒 Access Restricted! Enter Password to view Master Sales Data:");
+        
+        // Yahan apna man-pasand password set kar sakte ho (e.g., "1234" ya "admin123")
+        if (password !== "ascend") { 
+            alert("❌ Incorrect Password! Access Denied.");
+            return; // Galat password par tab switch nahi hoga
+        }
+    }
+
+    // Pass password, tab normal switch karega
     document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
     btnElement.classList.add("active");
-    currentSheet = sheetName;
+    currentSheet = tableName;
     loadSheetData();
 }
 
@@ -17,21 +30,36 @@ async function loadSheetData() {
     const tableBody = document.getElementById("tableBody");
     const tableHead = document.getElementById("tableHead");
     
-    let displayName = currentSheet === 'DA Sheet' ? 'DA Sheet (Automation)' : currentSheet;
-    tableBody.innerHTML = `<tr><td class="loading" colspan="15">Loading ${displayName} Data...</td></tr>`;
+    // 🔍 Target Table Declaration & Case Sensitivity Fix
+    let targetTable = currentSheet;
+    if (currentSheet.toLowerCase() === "outstanding") {
+        targetTable = "Outstanding";
+    }
+
+    let displayName = targetTable === 'DA Sheet' ? 'DA Sheet (Automation)' : targetTable;
+    tableBody.innerHTML = `<tr><td class="loading" colspan="15">Loading ${displayName} Data from Supabase...</td></tr>`;
     tableHead.innerHTML = "";
 
     try {
-        const response = await fetch(`${BASE_URL}?sheet=${encodeURIComponent(currentSheet)}`);
-        if (!response.ok) throw new Error("Network error");
+        // 🚀 URL Encoding + 50,000 Row Limit (Override 1000 limit)
+        const endpoint = `${SUPABASE_URL}/rest/v1/${encodeURIComponent(targetTable)}?select=*&limit=50000`;
+        
+        const response = await fetch(endpoint, {
+            method: "GET",
+            headers: {
+                "apikey": SUPABASE_ANON_KEY,
+                "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.message || "Failed to fetch data from Supabase");
+        }
         
         const data = await response.json();
         
-        if (data.error) {
-            tableBody.innerHTML = `<tr><td class="loading" style="color:red;" colspan="15">❌ ${data.error}</td></tr>`;
-            return;
-        }
-
         allData = data;
         filteredData = [...allData];
 
@@ -39,7 +67,7 @@ async function loadSheetData() {
         filterAndRender();
     } catch (error) {
         console.error(error);
-        tableBody.innerHTML = `<tr><td class="loading" style="color:red;" colspan="15">❌ Error fetching data. URL check karo.</td></tr>`;
+        tableBody.innerHTML = `<tr><td class="loading" style="color:red;" colspan="15">❌ Error fetching data from Supabase: ${error.message}</td></tr>`;
     }
 }
 
@@ -82,7 +110,7 @@ function filterAndRender() {
     renderTable(filteredData);
 }
 
-// 📅 Naya Date Formatter Function (dd-mmm-yyyy)
+// 📅 Date Formatter (dd-mmm-yyyy)
 function formatDate(dateString) {
     if (!dateString) return "";
     let d = new Date(dateString);
@@ -96,7 +124,7 @@ function formatDate(dateString) {
     return `${day}-${month}-${year}`;
 }
 
-// 📊 Stats Calculation & Update Function (Updated for Pending column)
+// 📊 Stats Calculation & Update Function
 function updateStats(data) {
     let totalAmount = 0;
     let totalPending = 0;
@@ -105,9 +133,8 @@ function updateStats(data) {
     if (data.length > 0) {
         const headers = Object.keys(data[0]);
         
-        // Find keys dynamically (ab yeh 'pending' word ko bhi pakad lega)
         const amountKey = headers.find(h => h.toLowerCase().includes("amount"));
-        const pendingKey = headers.find(h => h.toLowerCase().includes("pending") || h.toLowerCase().includes("Pending") || h.toLowerCase().includes("balance"));
+        const pendingKey = headers.find(h => h.toLowerCase().includes("pending") || h.toLowerCase().includes("balance"));
 
         data.forEach(row => {
             if (amountKey) {
@@ -125,6 +152,7 @@ function updateStats(data) {
     document.getElementById("totalPendingSum").textContent = "₹ " + totalPending.toLocaleString('en-IN');
     document.getElementById("totalBillsCount").textContent = billCount.toLocaleString('en-IN');
 }
+
 function renderTable(data) {
     const tableHead = document.getElementById("tableHead");
     const tableBody = document.getElementById("tableBody");
@@ -132,7 +160,6 @@ function renderTable(data) {
     tableHead.innerHTML = "";
     tableBody.innerHTML = "";
 
-    // Update the summary cards whenever table renders
     updateStats(data);
 
     if (!data.length) {
@@ -140,20 +167,20 @@ function renderTable(data) {
         return;
     }
 
-    const headers = Object.keys(data[0]);
+    // Auto-generated 'id' field ko table view se hidden rakhne ke liye filter
+    const headers = Object.keys(data[0]).filter(h => h !== "id");
 
-    // Headers Row setup
+    // Headers Row Setup
     let headerRow = document.createElement("tr");
     headers.forEach(header => {
         let th = document.createElement("th");
-        // Clean header view if it's auto-generated
         th.textContent = header.replace(/_/g, " ");
         th.onclick = () => sortTable(header);
         headerRow.appendChild(th);
     });
     tableHead.appendChild(headerRow);
 
-    // Data Rows setup
+    // Data Rows Setup
     data.forEach(row => {
         let tr = document.createElement("tr");
         headers.forEach(header => {
@@ -164,11 +191,11 @@ function renderTable(data) {
                 let stringVal = typeof val === 'object' ? JSON.stringify(val) : String(val);
                 let lowerHeader = header.toLowerCase();
 
-                // 📅 Date Check & Format (dd-mmm-yyyy)
+                // 📅 Date Formatting
                 if (lowerHeader.includes("date")) {
                     td.textContent = formatDate(stringVal);
                 } 
-                // Links Detect
+                // Links/Map Detection
                 else if (lowerHeader.includes("location") || stringVal.startsWith("http://") || stringVal.startsWith("https://")) {
                     let a = document.createElement("a");
                     a.href = stringVal;
@@ -208,5 +235,6 @@ function clearAllFilters() {
     filterAndRender();
 }
 
-// Start
+// App Initialization
+currentSheet = "outstanding";
 loadSheetData();
