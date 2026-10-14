@@ -26,6 +26,25 @@ function switchSheet(tableName, btnElement) {
     btnElement.classList.add("active");
     currentSheet = tableName;
     currentPage = 1;
+
+    // 🟢 Dropdown visibility control: Sirf 'sku_master_data' par Brand & MRP dropdowns dikhenge
+    const brandFilter = document.getElementById("brandFilter");
+    const mrpFilter = document.getElementById("mrpFilter");
+
+    if (currentSheet === "sku_master_data") {
+        if (brandFilter) brandFilter.style.display = "inline-block";
+        if (mrpFilter) mrpFilter.style.display = "inline-block";
+    } else {
+        if (brandFilter) {
+            brandFilter.style.display = "none";
+            brandFilter.value = "";
+        }
+        if (mrpFilter) {
+            mrpFilter.style.display = "none";
+            mrpFilter.value = "";
+        }
+    }
+
     loadSheetData();
 }
 
@@ -66,6 +85,12 @@ async function loadSheetData() {
 
         populateUsers();
         populateDates();
+        
+        // Agar current sheet SKU Master Data hai toh dropdowns ki values populate karo
+        if (currentSheet === "sku_master_data") {
+            populateSkuDropdowns();
+        }
+
         filterAndRender();
     } catch (error) {
         console.error(error);
@@ -107,6 +132,40 @@ function populateDates() {
     `;
 }
 
+// 🟢 SKU Master Data ke liye Brand aur MRP values dropdown mein bhadne ka function
+function populateSkuDropdowns() {
+    const brandFilter = document.getElementById("brandFilter");
+    const mrpFilter = document.getElementById("mrpFilter");
+
+    if (!brandFilter || !mrpFilter) return;
+
+    brandFilter.innerHTML = '<option value="">All Brands</option>';
+    mrpFilter.innerHTML = '<option value="">All MRP (Per Pcs)</option>';
+
+    let brands = new Set();
+    let mrps = new Set();
+
+    allData.forEach(row => {
+        // Tumhare Supabase columns ke exact names ke according
+        if (row.brand) brands.add(row.brand);
+        if (row.mrp_per_pcs !== undefined && row.mrp_per_pcs !== null) mrps.add(row.mrp_per_pcs);
+    });
+
+    brands.forEach(b => {
+        let opt = document.createElement("option");
+        opt.value = b;
+        opt.textContent = b;
+        brandFilter.appendChild(opt);
+    });
+
+    Array.from(mrps).sort((a, b) => Number(a) - Number(b)).forEach(m => {
+        let opt = document.createElement("option");
+        opt.value = m;
+        opt.textContent = m;
+        mrpFilter.appendChild(opt);
+    });
+}
+
 function toggleCustomDateInputs() {
     const dateFilter = document.getElementById("dateFilter");
     const customContainer = document.getElementById("customDateContainer");
@@ -128,6 +187,8 @@ function filterAndRender() {
     const searchVal = (document.getElementById("searchBox")?.value || "").toLowerCase().trim();
     const selectedUser = document.getElementById("userFilter")?.value || "";
     const selectedDateFilter = document.getElementById("dateFilter")?.value || "";
+    const selectedBrand = document.getElementById("brandFilter")?.value || "";
+    const selectedMrp = document.getElementById("mrpFilter")?.value || "";
 
     if (!allData.length) {
         renderTable([]);
@@ -161,6 +222,14 @@ function filterAndRender() {
         const matchesSearch = searchVal === "" || Object.values(row).some(val => String(val).toLowerCase().includes(searchVal));
         const matchesUser = !selectedUser || (userKey && String(row[userKey]).trim() === selectedUser);
 
+        // SKU Master Specific Dropdown Filters
+        let matchesBrand = true;
+        let matchesMrp = true;
+        if (currentSheet === "sku_master_data") {
+            if (selectedBrand && String(row.brand || "").trim() !== selectedBrand) matchesBrand = false;
+            if (selectedMrp && String(row.mrp_per_pcs ?? "") !== selectedMrp) matchesMrp = false;
+        }
+
         let matchesDate = true;
         if (selectedDateFilter && dateKey && row[dateKey]) {
             const rowDate = new Date(row[dateKey]);
@@ -180,7 +249,7 @@ function filterAndRender() {
             }
         }
 
-        return matchesSearch && matchesUser && matchesDate;
+        return matchesSearch && matchesUser && matchesBrand && matchesMrp && matchesDate;
     });
 
     renderTable(filteredData);
@@ -354,12 +423,16 @@ function clearAllFilters() {
     const dateFilter = document.getElementById("dateFilter");
     const startDate = document.getElementById("startDate");
     const endDate = document.getElementById("endDate");
+    const brandFilter = document.getElementById("brandFilter");
+    const mrpFilter = document.getElementById("mrpFilter");
 
     if (searchBox) searchBox.value = "";
     if (userFilter) userFilter.value = "";
     if (dateFilter) dateFilter.value = "";
     if (startDate) startDate.value = "";
     if (endDate) endDate.value = "";
+    if (brandFilter) brandFilter.value = "";
+    if (mrpFilter) mrpFilter.value = "";
 
     toggleCustomDateInputs();
     currentPage = 1;
