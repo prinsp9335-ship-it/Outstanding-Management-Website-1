@@ -18,14 +18,15 @@
 
 <!-- SHEET SELECTOR TABS -->
 <div class="sheet-tabs">
-    <button class="tab-btn active " onclick="switchSheet('Outstanding', this)">Outstanding</button>
+    <button class="tab-btn active" onclick="switchSheet('Outstanding', this)">Outstanding</button>
     <button class="tab-btn" onclick="switchSheet('Master_Sales_Data', this)">Master Sales Data</button>
     <button class="tab-btn" onclick="switchSheet('Final Data', this)">Final Data</button>
     <button class="tab-btn" onclick="switchSheet('Recovery', this)">Recovery</button>
     <button class="tab-btn" onclick="switchSheet('DA Sheet', this)">DA Sheet (Automation)</button>
+    <button class="tab-btn" onclick="switchSheet('sku_master_data', this)">SKU Master Data</button>
 </div>
 
-<!-- 📊 3 SUMMARY STATS CARDS (NEW ADDED) -->
+<!-- 📊 3 SUMMARY STATS CARDS -->
 <div class="stats-container">
     <div class="stat-card">
         <h3>Total Bill Amount</h3>
@@ -45,8 +46,19 @@
 <div class="filter-box">
     <input type="text" id="searchBox" placeholder="🔍 Search anything..." oninput="filterAndRender()">
     
+    <!-- General User Filter Dropdown -->
     <select id="userFilter" onchange="filterAndRender()">
         <option value="">All Users (GTM)</option>
+    </select>
+    
+    <!-- 🟢 Brand Dropdown (Sirf SKU Master ke liye visible hoga) -->
+    <select id="brandFilter" style="display: none;" onchange="filterAndRender()">
+        <option value="">All Brands</option>
+    </select>
+
+    <!-- 🟢 MRP Dropdown (Sirf SKU Master ke liye visible hoga) -->
+    <select id="mrpFilter" style="display: none;" onchange="filterAndRender()">
+        <option value="">All MRP (Per Pcs)</option>
     </select>
     
     <button onclick="clearAllFilters()">Clear Filters</button>
