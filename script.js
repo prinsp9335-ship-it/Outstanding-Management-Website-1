@@ -2,7 +2,7 @@
 /* =========================================================
    ASCEND DASHBOARD — SUPABASE
    Master_Sales_Data: Fixed 18 columns
-   DA Sheet: Outlet ID mapping fix
+   DA Sheet: Fixed 14 columns + Location Link Fix
    Other tabs: Existing functionality preserved
 ========================================================= */
 
@@ -33,7 +33,6 @@ function money(value) {
   });
 }
 
-// Trim spaces and normalize underscores, spaces and hyphens
 function keyName(value) {
   return String(value ?? "")
     .trim()
@@ -41,7 +40,6 @@ function keyName(value) {
     .replace(/[\s_-]+/g, "");
 }
 
-// Find a database column using alternate names
 function get(row, names) {
   if (!row) return "";
 
@@ -91,7 +89,7 @@ function recovery(row) {
 function pending(row) {
   const explicit = get(row, [
     "Pending",
-    "Pending Amount",
+    "Pending.....",
     "Outstanding",
     "Balance"
   ]);
@@ -222,6 +220,65 @@ function escapeHTML(value) {
     '"': "&quot;",
     "'": "&#39;"
   }[c]));
+}
+
+// 📍 LOCATION LINK FIX
+function locationHTML(value) {
+  const raw = String(value ?? "").trim();
+
+  if (!raw) return "—";
+
+  // Google Maps links and other direct HTTP/HTTPS URLs
+  if (/^https?:\/\//i.test(raw)) {
+    try {
+      const parsed = new URL(raw);
+
+      if (!["http:", "https:"].includes(parsed.protocol)) {
+        return escapeHTML(raw);
+      }
+
+      return `<a href="${escapeHTML(parsed.href)}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Open location in a new tab">📍 Open Location</a>`;
+    } catch (_) {
+      return escapeHTML(raw);
+    }
+  }
+
+  // Google Maps short links or maps.google.com links without a scheme
+  if (/^(www\.)?(google\.[^/]+\/maps|maps\.google\.[^/]+|maps\.app\.goo\.gl|goo\.gl\/maps)/i.test(raw)) {
+    return `<a href="https://${escapeHTML(raw)}"
+                target="_blank"
+                rel="noopener noreferrer">📍 Open Location</a>`;
+  }
+
+  // Coordinates such as 28.4595,77.0266
+  const coordinates = raw.match(
+    /^\s*(-?\d{1,3}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)\s*$/
+  );
+
+  if (coordinates) {
+    const lat = Number(coordinates[1]);
+    const lon = Number(coordinates[2]);
+
+    if (lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+      const mapURL =
+        `https://www.google.com/maps?q=${encodeURIComponent(`${lat},${lon}`)}`;
+
+      return `<a href="${mapURL}"
+                  target="_blank"
+                  rel="noopener noreferrer">📍 Open Location</a>`;
+    }
+  }
+
+  // Plain address or location text
+  const searchURL =
+    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(raw)}`;
+
+  return `<a href="${searchURL}"
+              target="_blank"
+              rel="noopener noreferrer">📍 Search Location</a>`;
 }
 
 function showToast(message) {
@@ -435,11 +492,9 @@ function populateSkuDropdowns() {
 
   allRows.forEach(row => {
     const brand = get(row, ["brand", "Brand"]);
-
     const mrp = get(row, ["mrp_per_pcs", "MRP Per Pcs"]);
 
     if (brand !== "") brands.add(String(brand));
-
     if (mrp !== "") mrps.add(String(mrp));
   });
 
@@ -639,8 +694,6 @@ const defaultColumns = [
   ["Weekday", [], "weekday"],
   ["GTM / User", ["User", "GTM", "Salesperson", "Sales Person"], "text"],
   ["Outlet Name", ["Outlet_Name", "Outlet Name", "Outlet"], "text"],
-
-  // FIX: Expanded Outlet ID aliases for DA Sheet
   [
     "Outlet ID",
     [
@@ -655,7 +708,6 @@ const defaultColumns = [
     ],
     "text"
   ],
-
   ["Bill No", ["Bill_No", "Bill No", "Bill Number"], "text"],
   ["Bill Amount", ["Amount", "Bill Amount", "Bill_Amount", "Total Amount"], "amount"],
   ["Recovery", ["Recovery", "Recovery Amount", "Recovered Amount"], "recovery"],
@@ -690,10 +742,32 @@ const masterSalesColumns = [
   ["Description", ["Description"], "text"]
 ];
 
+// 🚚 DA Sheet — FIXED 14 COLUMNS
+const daSheetColumns = [
+  ["Sale Date", ["Sale Date"], "date"],
+  ["User", ["User"], "text"],
+  ["Outlet name", ["Outlet_Name", "Outlet name", "Outlet Name"], "text"],
+  ["Bill_No", ["Bill_No", "Bill No", "Bill Number"], "text"],
+  ["Amount", ["Amount"], "amount"],
+  ["Cash", ["Cash"], "text"],
+  ["Online", ["Online"], "text"],
+  ["Credit", ["Credit"], "text"],
+  ["Pending", ["Pending", "Pending Amount", "Outstanding", "Balance"], "pending"],
+  ["Credit Allow", ["Credit Allow", "Credit_Allow", "Credit Allowance"], "text"],
+  ["Status", ["Status"], "text"],
+  ["Location", ["Location", "Map Link", "Location Link"], "location"],
+  ["Rider", ["Rider", "Rider Name", "Rider_Name", "DA"], "text"],
+  ["Reating", ["Reating", "Rating", "Outlet Rating"], "text"]
+];
+
 // 🧱 Render Cell
 function cell(row, column) {
   const [label, aliases, type] = column;
   const value = get(row, aliases.length ? aliases : [label]);
+
+  if (type === "location") {
+    return `<td>${locationHTML(value)}</td>`;
+  }
 
   if (type === "date") {
     const d = parseDate(row);
@@ -733,8 +807,9 @@ function cell(row, column) {
     return `<td>${statusHTML(row)}</td>`;
   }
 
-  const stringVal = String(value ?? "");
+  const stringVal = String(value ?? "").trim();
 
+  // Make URLs clickable in other tabs too
   if (/^https?:\/\//i.test(stringVal)) {
     return `<td><a href="${escapeHTML(stringVal)}" target="_blank" rel="noopener noreferrer">📍 Open Link</a></td>`;
   }
@@ -750,13 +825,12 @@ function renderTable() {
   if (!tableHead || !tableBody) return;
 
   let activeColumns = defaultColumns;
-
   const sheetName = currentSheet.toLowerCase();
 
-  // FIX 1: Master Sales uses only the requested 18 columns
   if (sheetName === "master_sales_data") {
     activeColumns = masterSalesColumns;
-
+  } else if (sheetName === "da sheet") {
+    activeColumns = daSheetColumns;
   } else if (sheetName === "sku_master_data") {
     if (filteredRows.length > 0) {
       const keys = Object.keys(filteredRows[0])
@@ -768,7 +842,6 @@ function renderTable() {
         "text"
       ]);
     }
-
   } else if (
     filteredRows.length > 0 &&
     !get(filteredRows[0], ["Amount", "Bill Amount", "Bill_Amount"])
