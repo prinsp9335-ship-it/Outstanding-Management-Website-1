@@ -53,7 +53,7 @@ function recovery(row) {
 }
 
 function pending(row) {
-  const explicit = get(row, ["Pending", "Pending Amount", "Outstanding", "Balance"]);
+  const explicit = get(row, ["Pending", "Pending.....", "Outstanding", "Balance"]);
   return explicit !== "" ? number(explicit) : Math.max(0, amount(row) - recovery(row));
 }
 
