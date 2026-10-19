@@ -1,80 +1,142 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ascend Advanced Dashboard</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ASCEND | Outstanding Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<header>
-    <div>
-        <h2>ASCEND OUTSTANDING</h2>
-        <p>Multi-Sheet Management Dashboard</p>
-    </div>
-    <button onclick="loadSheetData()" class="refresh-btn">🔄 Refresh</button>
-</header>
+<div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
 
-<!-- SHEET SELECTOR TABS -->
-<div class="sheet-tabs">
-    <button class="tab-btn active" onclick="switchSheet('Outstanding', this)">Outstanding</button>
-    <button class="tab-btn" onclick="switchSheet('Master_Sales_Data', this)">Master Sales Data</button>
-    <button class="tab-btn" onclick="switchSheet('Final Data', this)">Final Data</button>
-    <button class="tab-btn" onclick="switchSheet('DA Sheet', this)">DA Sheet (Automation)</button>
-    <button class="tab-btn" onclick="switchSheet('sku_master_data', this)">SKU Master Data</button>
-</div>
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="brand-logo">A</div>
+    <div><b>ASCEND</b><small>Finance Workspace</small></div>
+  </div>
 
-<!-- 📊 3 SUMMARY STATS CARDS -->
-<div class="stats-container">
-    <div class="stat-card">
-        <h3>Total Bill Amount</h3>
-        <p id="totalAmountSum">₹ 0</p>
-    </div>
-    <div class="stat-card">
-        <h3>Pending Amount</h3>
-        <p id="totalPendingSum">₹ 0</p>
-    </div>
-    <div class="stat-card">
-        <h3>Total Bills Count</h3>
-        <p id="totalBillsCount">0</p>
-    </div>
-</div>
+  <p class="nav-label">WORKSPACE</p>
+  <nav>
+    <button class="nav-btn active" data-sheet="Outstanding">▥ Outstanding</button>
+    <button class="nav-btn" data-sheet="Master_Sales_Data">▤ Master Sales</button>
+    <button class="nav-btn" data-sheet="Final Data">▦ Final Data</button>
+    <button class="nav-btn" data-sheet="Recovery">↻ Recovery</button>
+    <button class="nav-btn" data-sheet="DA Sheet">▣ DA Sheet</button>
+    <button class="nav-btn" data-sheet="sku_master_data">⬡ SKU Master</button>
+    <a class="nav-btn" href="https://apal88458.github.io/outlet-finder/tracking.html?id=000000" target="_blank">⌖ Outlet Finder ↗</a>
+  </nav>
 
-<!-- FILTER & SEARCH SECTION -->
-<div class="filter-box">
-    <input type="text" id="searchBox" placeholder="🔍 Search anything..." oninput="filterAndRender()">
-    
-    <!-- General User Filter Dropdown -->
-    <select id="userFilter" onchange="filterAndRender()">
-        <option value="">All Users (GTM)</option>
+  <button id="darkModeBtn" class="nav-btn">◐ Dark / Light Mode</button>
+
+  <div class="sidebar-footer">
+    <div class="crax-logo">CRAX</div>
+    <div><b>CRAX Distribution</b><small>Sales & Recovery</small></div>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div class="heading">
+      <button id="menuBtn" class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <div>
+        <small>FINANCE & DISTRIBUTION</small>
+        <h1 id="pageTitle">Outstanding Overview</h1>
+      </div>
+    </div>
+    <button class="refresh-btn" onclick="loadSheetData()">↻ Refresh</button>
+  </header>
+
+  <section class="stats">
+    <article class="stat-card">
+      <div class="stat-icon blue">▤</div>
+      <div><small>TOTAL BILL AMOUNT</small><h2 id="totalAmountSum">₹0.00</h2><p>Total billed value</p></div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-icon red">◷</div>
+      <div><small>PENDING AMOUNT</small><h2 class="red-text" id="totalPendingSum">₹0.00</h2><p>Outstanding balance</p></div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-icon green">↗</div>
+      <div><small>RECOVERY AMOUNT</small><h2 class="green-text" id="totalRecoverySum">₹0.00</h2><p>Amount recovered</p></div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-icon blue">▧</div>
+      <div><small>TOTAL BILLS COUNT</small><h2 class="blue-text" id="totalBillsCount">0</h2><p>Total records</p></div>
+    </article>
+  </section>
+
+  <section class="filters" id="filters">
+    <input id="searchBox" type="search" placeholder="Search outlet, bill no, rider, GTM...">
+
+    <select id="userFilter"><option value="">All GTM / Users</option></select>
+
+    <select id="dateFilter">
+      <option value="all">All Dates</option>
+      <option value="today">Today</option>
+      <option value="7">Last 7 Days</option>
+      <option value="30">Last 30 Days</option>
+      <option value="custom">Custom Dates</option>
     </select>
-    
-    <!-- 🟢 Brand Dropdown (Sirf SKU Master ke liye visible hoga) -->
-    <select id="brandFilter" style="display: none;" onchange="filterAndRender()">
-        <option value="">All Brands</option>
+
+    <select id="weekdayFilter">
+      <option value="">All Weekdays</option>
+      <option>Monday</option><option>Tuesday</option>
+      <option>Wednesday</option><option>Thursday</option>
+      <option>Friday</option><option>Saturday</option><option>Sunday</option>
     </select>
 
-    <!-- 🟢 MRP Dropdown (Sirf SKU Master ke liye visible hoga) -->
-    <select id="mrpFilter" style="display: none;" onchange="filterAndRender()">
-        <option value="">All MRP (Per Pcs)</option>
-    </select>
-    
-    <button onclick="clearAllFilters()">Clear Filters</button>
-</div>
 
-<!-- TABLE CONTAINER -->
-<div class="table-container">
-    <table id="dataTable">
-        <thead id="tableHead">
-            <!-- Dynamic Headers -->
-        </thead>
+
+    <select id="statusFilter">
+      <option value="">All Statuses</option>
+      <option value="paid">Paid</option>
+      <option value="part">Part Paid</option>
+      <option value="due">Due</option>
+    </select>
+
+    <button class="small-btn" id="toggleFiltersBtn">Hide Filters</button>
+    <button class="clear-btn" id="clearBtn">Clear</button>
+
+    <div id="customDates" class="custom-dates hidden">
+      <label>From <input type="date" id="startDate"></label>
+      <label>To <input type="date" id="endDate"></label>
+    </div>
+  </section>
+
+  <section class="table-card">
+    <div class="table-heading">
+      <div><h3 id="tableTitle">Outstanding Bills</h3><p>Week-wise view · Latest records first</p></div>
+      <div class="table-actions">
+        <label><input type="checkbox" id="compactToggle" checked> Compact rows</label>
+        <button class="small-btn" id="exportBtn">↓ Export CSV</button>
+      </div>
+    </div>
+    
+
+    <div class="table-scroll">
+      <table>
+        <thead id="tableHead"></thead>
         <tbody id="tableBody">
-            <tr><td class="loading">Loading Data...</td></tr>
+          <tr><td class="loading" colspan="13">Configure your data source in script.js.</td></tr>
         </tbody>
-    </table>
-</div>
+      </table>
+    </div>
 
+    <footer class="table-footer">
+      <span id="recordCount">0 records</span>
+      <div class="pagination">
+        <button id="prevPage">← Prev</button>
+        <span id="pageInfo">Page 1</span>
+        <button id="nextPage">Next →</button>
+      </div>
+    </footer>
+  </section>
+</main>
+
+<div id="toast" class="toast"></div>
 <script src="script.js"></script>
 </body>
 </html>
