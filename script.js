@@ -757,7 +757,29 @@ const daSheetColumns = [
   ["Status", ["Status"], "text"],
   ["Location", ["Location", "Map Link", "Location Link"], "location"],
   ["Rider", ["Rider", "Rider Name", "Rider_Name", "DA"], "text"],
-  ["Reating", ["Reating", "Rating", "Outlet Rating"], "text"]
+  ["Reating", ["Reating", "Reating.", "Outlet Rating"], "text"]
+];
+const finalDataColumns = [
+  ["Distributor", ["Distributor"], "text"],
+  ["Date", ["Date", "Sale Date"], "date"],
+  ["User", ["User"], "text"],
+  ["Outlet name", ["Outlet name", "Outlet_Name", "Outlet Name"], "text"],
+  ["Outlet_ID", ["Outlet_ID", "Outlet ID", "Outlet Id"], "text"],
+  ["Bill_No", ["Bill_No", "Bill No", "Bill Number"], "text"],
+  ["Amount", ["Amount"], ],
+  ["Cash", ["Cash"], ],
+  ["Online", ["Online"], ],
+  ["Credit", ["Credit"], ],
+  ["Cheques", ["Cheques", "Cheque", "Check"], ],
+  ["Rider name", ["Rider name", "Rider_Name", "Rider", "DA"], "text"],
+  ["Remark", ["Remark", "Remarks"], "text"],
+  ["Recovery", ["Recovery"], "amount"],
+  ["Pending.....", ["Pending.....", "Pending", "Pending Amount", "Outstanding"], "pending"],
+  ["CN", ["CN"], "text"],
+  ["Description", ["Description"], "text"],
+  ["No", ["No"], "text"],
+  ["Mon", ["Mon"], "text"],
+  ["Reating.", ["Reating.", "Reating", "Rating"], "text"]
 ];
 
 // 🧱 Render Cell
@@ -828,13 +850,18 @@ function renderTable() {
   const sheetName = currentSheet.toLowerCase();
 
   if (sheetName === "master_sales_data") {
-    activeColumns = masterSalesColumns;
-  } else if (sheetName === "da sheet") {
-    activeColumns = daSheetColumns;
-  } else if (sheetName === "sku_master_data") {
-    if (filteredRows.length > 0) {
-      const keys = Object.keys(filteredRows[0])
-        .filter(k => k !== "id");
+  activeColumns = masterSalesColumns;
+
+} else if (sheetName === "da sheet") {
+  activeColumns = daSheetColumns;
+
+} else if (sheetName === "final data") {
+  activeColumns = finalDataColumns;
+
+} else if (sheetName === "sku_master_data") {
+  if (filteredRows.length > 0) {
+    const keys = Object.keys(filteredRows[0])
+      .filter(k => k !== "id");
 
       activeColumns = keys.map(k => [
         k.replace(/_/g, " "),
