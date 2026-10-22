@@ -1,10 +1,4 @@
 
-/* =========================================================
-   ASCEND DASHBOARD — SUPABASE
-   Master_Sales_Data: Fixed 18 columns
-   DA Sheet: Fixed 14 columns + Location Link Fix
-   Other tabs: Existing functionality preserved
-========================================================= */
 
 // ⚡ Supabase Configuration
 const SUPABASE_URL = "https://vwmmekqsncajubsqoitd.supabase.co";
