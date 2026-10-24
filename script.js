@@ -1,4 +1,12 @@
 
+/* =========================================================
+   ASCEND DASHBOARD — SUPABASE
+   Master_Sales_Data: Fixed 18 columns
+   DA Sheet: Fixed 14 columns + Location Link Fix
+   Other tabs: Existing functionality preserved
+========================================================= */
+
+// ⚡ Supabase Configuration
 const SUPABASE_URL = "https://vwmmekqsncajubsqoitd.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_saFTZ0xJ4l1yoEUCeDNmZQ_2IonEsgU";
 const PAGE_SIZE = 100;
@@ -624,7 +632,8 @@ function filterAndRender() {
 
     return true;
   });
- if (!sortKey && filteredRows.length > 0) { sortKey = Object.keys(filteredRows[0]).find(k => ["bill_no", "billno", "bill number", "bill no"].includes(keyName(k))) || ""; sortDirection = 1; }
+// Yeh rahi wo 1 line jo yahan lagani hai:
+  if (!sortKey && filteredRows.length > 0) { sortKey = Object.keys(filteredRows[0]).find(k => ["bill_no", "billno", "bill number", "bill no"].includes(keyName(k))) || ""; sortDirection = 1; }
   if (sortKey) {
     filteredRows.sort((a, b) => {
       const av = get(a, [sortKey]);
@@ -707,7 +716,6 @@ const defaultColumns = [
   ["Rider", ["Rider Name", "Rider_Name", "Rider", "DA"], "text"],
   ["Status", ["Status", "Payment Status", "Bill Status"], "status"],
   ["Description", ["Description", "Description", "Description"]]
-  ["cheaque", ["Mon", "Mon", "Mon"]],
 ];
 
 // 🧾 Master_Sales_Data — EXACT 18 COLUMNS
