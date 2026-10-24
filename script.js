@@ -1,6 +1,4 @@
 
-
-// ⚡ Supabase Configuration
 const SUPABASE_URL = "https://vwmmekqsncajubsqoitd.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_saFTZ0xJ4l1yoEUCeDNmZQ_2IonEsgU";
 const PAGE_SIZE = 100;
