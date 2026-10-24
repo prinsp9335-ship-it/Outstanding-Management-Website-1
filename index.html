@@ -14,13 +14,15 @@
 <div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
 
 <aside class="sidebar" id="sidebar">
- <div class="brand">
+  
+<div class="brand">
   <img onclick="loadSheetData()" src="./Logo-1.webp" alt="ASCEND Logo" class="brand-logo ">
   <div>
     <b>ASCEND</b>
     <small>Finance Workspace</small>
   </div>
 </div>
+
 
   <p class="nav-label">WORKSPACE</p>
   <nav>
@@ -78,7 +80,7 @@
     <select id="userFilter"><option value="">All GTM / Users</option></select>
 
     <select id="dateFilter">
-      <option value="all">All Dates</option>
+      <option value="all">Dates</option>
       <option value="today">Today</option>
       <option value="7">Last 7 Days</option>
       <option value="30">Last 30 Days</option>
@@ -86,7 +88,7 @@
     </select>
 
     <select id="weekdayFilter">
-      <option value="">All Weekdays</option>
+      <option value="">Weekdays</option>
       <option>Monday</option><option>Tuesday</option>
       <option>Wednesday</option><option>Thursday</option>
       <option>Friday</option><option>Saturday</option><option>Sunday</option>
@@ -95,7 +97,7 @@
 
 
     <select id="statusFilter">
-      <option value="">All Statuses</option>
+      <option value="">Statuses</option>
       <option value="paid">Paid</option>
       <option value="part">Part Paid</option>
       <option value="due">Due</option>
