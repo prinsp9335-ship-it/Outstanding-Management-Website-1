@@ -709,7 +709,7 @@ const defaultColumns = [
   ["Rider", ["Rider Name", "Rider_Name", "Rider", "DA"], "text"],
   ["Status", ["Status", "Payment Status", "Bill Status"], "status"],
   ["Description", ["Description", "Description", "Description"]]
-  ["Chaque", ["Mon", "Mon", "Mon"]],
+  ["cheaque", ["Mon", "Mon", "Mon"]],
 ];
 
 // 🧾 Master_Sales_Data — EXACT 18 COLUMNS
