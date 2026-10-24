@@ -624,7 +624,7 @@ function filterAndRender() {
 
     return true;
   });
-
+ if (!sortKey && filteredRows.length > 0) { sortKey = Object.keys(filteredRows[0]).find(k => ["bill_no", "billno", "bill number", "bill no"].includes(keyName(k))) || ""; sortDirection = 1; }
   if (sortKey) {
     filteredRows.sort((a, b) => {
       const av = get(a, [sortKey]);
