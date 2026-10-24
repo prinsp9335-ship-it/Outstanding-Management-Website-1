@@ -462,3 +462,17 @@ body.dark-mode .filters select { background: #0e1c30; color: #e7eef9; border-col
     font-weight: 800 !important;
     background-color: #ffffff;
 }
+
+.brand-logo {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
