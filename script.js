@@ -707,7 +707,8 @@ const defaultColumns = [
   ["Recovery", ["Recovery", "Recovery Amount", "Recovered Amount"], "recovery"],
   ["Pending", ["Pending", "Pending Amount", "Outstanding", "Balance"], "pending"],
   ["Rider", ["Rider Name", "Rider_Name", "Rider", "DA"], "text"],
-  ["Status", ["Status", "Payment Status", "Bill Status"], "status"]
+  ["Status", ["Status", "Payment Status", "Bill Status"], "status"],
+  ["Description", ["Description", "Description", "Description"]]
 ];
 
 // 🧾 Master_Sales_Data — EXACT 18 COLUMNS
