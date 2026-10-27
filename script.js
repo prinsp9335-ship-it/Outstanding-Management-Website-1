@@ -710,7 +710,7 @@ const defaultColumns = [
   ["Rider", ["Rider Name", "Rider_Name", "Rider", "DA"], "text"],
   ["Status", ["Status", "Payment Status", "Bill Status"], "status"],
   ["Description", ["Description", "Description", "Description"]],
-   ["Reating", ["Reating", "Reating.", "Outlet Rating"], "text"]
+   ["Reating", ["Reating", "Reating.", "Outlet Rating","Reting..."], "text"]
 ];
 
 // 🧾 Master_Sales_Data — EXACT 18 COLUMNS
@@ -736,8 +736,7 @@ const masterSalesColumns = [
   ["Diff", ["Diff"], "text"],
   ["Category", ["Category"], "text"],
   ["Expire", ["Expire"], "text"],
-  ["Description", ["Description"], "text"],
-   ["Reating", ["Reating", "Reating.", "Outlet Rating"], "text"]
+  ["Description", ["Description"], "text"]
 ];
 
 // 🚚 DA Sheet — FIXED 14 COLUMNS
