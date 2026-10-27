@@ -685,6 +685,7 @@ function updateSummary() {
 // 📋 Default Columns — Other Tabs
 const defaultColumns = [
   ["Distributor", ["Distributor"], "text"],
+  ["Delivery Date", ["Delivery Date"], "text"],
   ["Date", ["Date", "Bill Date", "Sale Date"], "date"],
   ["Weekday", [], "weekday"],
   ["GTM / User", ["User", "GTM", "Salesperson", "Sales Person"], "text"],
@@ -736,7 +737,8 @@ const masterSalesColumns = [
   ["Diff", ["Diff"], "text"],
   ["Category", ["Category"], "text"],
   ["Expire", ["Expire"], "text"],
-  ["Description", ["Description"], "text"]
+  ["Description", ["Description"], "text"],
+  ["Reating", ["Reating", "Reating.", "Outlet Rating","Reting..."], "text"]
 ];
 
 // 🚚 DA Sheet — FIXED 14 COLUMNS
