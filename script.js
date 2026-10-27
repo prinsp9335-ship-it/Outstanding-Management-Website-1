@@ -1,10 +1,4 @@
 
-/* =========================================================
-   ASCEND DASHBOARD — SUPABASE
-   Master_Sales_Data: Fixed 18 columns
-   DA Sheet: Fixed 14 columns + Location Link Fix
-   Other tabs: Existing functionality preserved
-========================================================= */
 
 // ⚡ Supabase Configuration
 const SUPABASE_URL = "https://vwmmekqsncajubsqoitd.supabase.co";
@@ -715,7 +709,8 @@ const defaultColumns = [
   ["Pending", ["Pending", "Pending Amount", "Outstanding", "Balance"], "pending"],
   ["Rider", ["Rider Name", "Rider_Name", "Rider", "DA"], "text"],
   ["Status", ["Status", "Payment Status", "Bill Status"], "status"],
-  ["Description", ["Description", "Description", "Description"]]
+  ["Description", ["Description", "Description", "Description"]],
+   ["Reating", ["Reating", "Reating.", "Outlet Rating"], "text"]
 ];
 
 // 🧾 Master_Sales_Data — EXACT 18 COLUMNS
@@ -741,7 +736,8 @@ const masterSalesColumns = [
   ["Diff", ["Diff"], "text"],
   ["Category", ["Category"], "text"],
   ["Expire", ["Expire"], "text"],
-  ["Description", ["Description"], "text"]
+  ["Description", ["Description"], "text"],
+   ["Reating", ["Reating", "Reating.", "Outlet Rating"], "text"]
 ];
 
 // 🚚 DA Sheet — FIXED 14 COLUMNS
