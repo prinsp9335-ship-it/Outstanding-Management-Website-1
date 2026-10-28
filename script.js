@@ -685,7 +685,7 @@ function updateSummary() {
 // 📋 Default Columns — Other Tabs
 const defaultColumns = [
   ["Distributor", ["Distributor"], "text"],
-  ["Delivery Date", ["Delivery Date"], "date"],
+  ["Delivery Date", ["Delivery Date"], "text"],
   ["Date", ["Date", "Bill Date", "Sale Date"], "date"],
   ["Weekday", [], "weekday"],
   ["GTM / User", ["User", "GTM", "Salesperson", "Sales Person"], "text"],
