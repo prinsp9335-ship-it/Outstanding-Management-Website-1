@@ -751,7 +751,7 @@ const daSheetColumns = [
   ["Cash", ["Cash"], "text"],
   ["Online", ["Online"], "text"],
   ["Credit", ["Credit"], "text"],
-  ["Pending", ["Pending", "Pending Amount", "Outstanding", "Balance"], "pending"],
+  ["Pending", ["Pending" ], "pending"],
   ["Credit Allow", ["Credit Allow", "Credit_Allow", "Credit Allowance"], "text"],
   ["Status", ["Status"], "text"],
   ["Location", ["Location", "Map Link", "Location Link"], "location"],
